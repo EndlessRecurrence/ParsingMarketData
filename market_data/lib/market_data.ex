@@ -3,7 +3,7 @@ defmodule MarketData do
     Functions for processing a large file containing stock market data.
   """
 
-  def main do
+  def convert_file_data_into_objects do
     [properties | data] = read_data_as_text_from_file("res/data.txt")
     objects = create_objects_as_maps(data, properties, [])
     retrieve_top_currencies_by_property(objects, "changePercent", 3)
@@ -23,10 +23,11 @@ defmodule MarketData do
   end
 
   def parse_string(string) do
-    possible_integer = Integer.parse(string)
-    if is_tuple(possible_integer) and elem(possible_integer, 1) == "", do: elem(possible_integer, 0)
-    possible_float = Float.parse(string)
-    if is_tuple(possible_float) and elem(possible_float, 1) == "", do: elem(possible_float, 0), else: string
+    if is_tuple(Integer.parse(string)) and elem(Integer.parse(string), 1) == "" do
+      elem(Integer.parse(string), 0)
+    else
+      if is_tuple(Float.parse(string)) and elem(Float.parse(string), 1) == "", do: elem(Float.parse(string), 0), else: string
+    end
   end
 
   def split_line_into_tokens(line) do
