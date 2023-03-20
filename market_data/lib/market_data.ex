@@ -32,17 +32,19 @@ defmodule MarketData do
     end
   end
 
-  def parse_string(string) do
+  def parse_string(string) when is_bitstring(string) do
     if is_tuple(Integer.parse(string)) and elem(Integer.parse(string), 1) == "" do
       elem(Integer.parse(string), 0)
     else
       if is_tuple(Float.parse(string)) and elem(Float.parse(string), 1) == "", do: elem(Float.parse(string), 0), else: string
     end
   end
+  def parse_string(_), do: raise ArgumentError, message: "The input to parse_string should be a BitString."
 
-  def split_line_into_tokens(line) do
+  def split_line_into_tokens(line) when is_bitstring(line) do
     Regex.split(~r/\s+/, line)
   end
+  def split_line_into_tokens(_), do: raise ArgumentError, message: "The input to split_line_into_tokens should be a BitString."
 
   def create_objects_as_maps([], _, objects), do: objects
   def create_objects_as_maps([list | lists], properties, objects) do

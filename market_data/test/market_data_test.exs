@@ -194,5 +194,29 @@ defmodule MarketDataTest do
         MarketData.convert_file_data_into_objects(state[:empty_filepath])
       end
     end
+
+    test "reject if input to string parsing function is an integer", _state do
+      assert_raise ArgumentError, "The input to parse_string should be a BitString.", fn ->
+        MarketData.parse_string(12)
+      end
+    end
+
+    test "reject if input to string parsing function is a float", _state do
+      assert_raise ArgumentError, "The input to parse_string should be a BitString.", fn ->
+        MarketData.parse_string(12.3)
+      end
+    end
+
+    test "reject if input to tokenization function is an integer", _state do
+      assert_raise ArgumentError, "The input to split_line_into_tokens should be a BitString.", fn ->
+        MarketData.split_line_into_tokens(12)
+      end
+    end
+
+    test "reject if input to tokenization function is a float", _state do
+      assert_raise ArgumentError, "The input to split_line_into_tokens should be a BitString.", fn ->
+        MarketData.split_line_into_tokens(12.3)
+      end
+    end
   end
 end
