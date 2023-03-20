@@ -14,10 +14,6 @@ defmodule MarketData do
   end
 
   def read_data_as_text_from_file(path) do
-    read_lines_from_file(path)
-  end
-
-  def read_lines_from_file(path) do
     lines =
       path
       |> File.stream!()
