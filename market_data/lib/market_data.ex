@@ -3,10 +3,14 @@ defmodule MarketData do
     Functions for processing a large file containing stock market data.
   """
 
-  def convert_file_data_into_objects do
-    [properties | data] = read_data_as_text_from_file("res/data.txt")
-    objects = create_objects_as_maps(data, properties, [])
-    retrieve_top_currencies_by_property(objects, "changePercent", 3)
+  def main() do
+    convert_file_data_into_objects("res/data.txt") |>
+    retrieve_top_currencies_by_property("changePercent", 3)
+  end
+
+  def convert_file_data_into_objects(filepath) do
+    [properties | data] = read_data_as_text_from_file(filepath)
+    create_objects_as_maps(data, properties, [])
   end
 
   def read_data_as_text_from_file(path) do
