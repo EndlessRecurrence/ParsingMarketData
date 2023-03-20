@@ -3,10 +3,10 @@ defmodule MarketDataTest do
   doctest MarketData
 
   setup_all do
-    {:ok, filepath: "res/data.txt"}
+    {:ok, filepath: "res/data.txt", empty_filepath: "res/empty.txt"}
   end
 
-  describe "required features" do
+  describe "required features:" do
     test "check if file data is converted into objects", state do
       assert MarketData.convert_file_data_into_objects(state[:filepath]) == [
         %{
@@ -167,6 +167,32 @@ defmodule MarketDataTest do
 
     test "check if strings representing currency pairs are properly parsed", _state do
       assert MarketData.parse_string("EUR/RON") == "EUR/RON"
+    end
+  end
+
+  describe "reject invalid inputs:" do
+    test "reject if inputs to file-object conversion function are integers", _state do
+      assert_raise ArgumentError, "The input to convert_file_data_to_objects should be a filepath string.", fn ->
+        MarketData.convert_file_data_into_objects(12)
+      end
+    end
+
+    test "reject if inputs to file-object conversion function are floats", _state do
+      assert_raise ArgumentError, "The input to convert_file_data_to_objects should be a filepath string.", fn ->
+        MarketData.convert_file_data_into_objects(3.14159)
+      end
+    end
+
+    test "reject if input to file-object conversion function is a non-existent file", _state do
+      assert_raise RuntimeError, "The file doesn't exist.", fn ->
+        MarketData.convert_file_data_into_objects("res/non_existent_file.hs")
+      end
+    end
+
+    test "reject if input to file-object conversion function is an empty file", state do
+      assert_raise RuntimeError, "The file is empty.", fn ->
+        MarketData.convert_file_data_into_objects(state[:empty_filepath])
+      end
     end
   end
 end

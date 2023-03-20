@@ -8,18 +8,28 @@ defmodule MarketData do
     retrieve_top_currencies_by_property("changePercent", 3)
   end
 
-  def convert_file_data_into_objects(filepath) do
-    [properties | data] = read_data_as_text_from_file(filepath)
-    create_objects_as_maps(data, properties, [])
+  def convert_file_data_into_objects(filepath) when is_bitstring(filepath) do
+    try do
+      [properties | data] = read_data_as_text_from_file(filepath)
+      create_objects_as_maps(data, properties, [])
+    rescue
+      e in MatchError -> raise RuntimeError, message: "The file is empty."
+    end
   end
+  def convert_file_data_into_objects(_), do:
+    raise ArgumentError, message: "The input to convert_file_data_to_objects should be a filepath string."
 
   def read_data_as_text_from_file(path) do
-    lines =
-      path
-      |> File.stream!()
-      |> Enum.map(&String.trim/1)
+    try do
+      lines =
+        path
+        |> File.stream!()
+        |> Enum.map(&String.trim/1)
 
-    lines |> Enum.map(&split_line_into_tokens(&1))
+      lines |> Enum.map(&split_line_into_tokens(&1))
+    rescue
+      e in File.Error -> raise RuntimeError, message: "The file doesn't exist."
+    end
   end
 
   def parse_string(string) do
@@ -47,4 +57,5 @@ defmodule MarketData do
     |> Enum.sort(fn x, y -> x[property] > y[property] end)
     |> Enum.take(number_of_currencies)
   end
+
 end
