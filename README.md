@@ -20,3 +20,5 @@ NOTE: Do not assume & hardcode the properties but parse them from the header.
 
 b) Retrieve the top 3 currency pairs with the biggest (percentage) changes from the data chunk.
 
+## Running the project
+Type `mix currencies.parse --path=<PATH_TO_DATA_FILE>` and `mix currencies.top --count=X --column=<COLUMN_TO_BE_SORTED>` to get the top X currencies.
