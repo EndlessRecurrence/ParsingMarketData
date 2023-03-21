@@ -60,7 +60,7 @@ defmodule Mix.Tasks.Currencies.Parse do
   def run(args) do
     {incorrect_tokens, correct_tokens} = ArgParsing.process_arguments(args)
     allowed_arguments = ["path"]
-    Enum.each(incorrect_tokens, &IO.puts("The argument \"#{&1}\" is incorrectly formated."))
+    Enum.each(incorrect_tokens, &IO.puts("ERROR: The argument \"#{&1}\" is incorrectly formated."))
     Enum.each(correct_tokens, fn x ->
       if Enum.at(x, 0) != "path", do:
         IO.puts("ERROR: The argument \"#{x}\" is not specified in the documentation.")
