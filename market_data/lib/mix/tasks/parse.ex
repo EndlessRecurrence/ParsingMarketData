@@ -1,11 +1,27 @@
-defmodule MarketData do
+defmodule Mix.Tasks.Currencies.Parse do
   @moduledoc """
-    Functions for processing a large file containing stock market data.
+    A Mix.Task which parses a file containing currency data.
   """
+  use Mix.Task
+  alias ArgParsing
 
-  def main() do
-    convert_file_data_into_objects("res/data.txt") |>
-    retrieve_top_currencies_by_property("changePercent", 3)
+  #def main() do
+  #  convert_file_data_into_objects("res/data.txt") |>
+  #  retrieve_top_currencies_by_property("changePercent", 3)
+  #end
+
+  def create_json_file_containing_market_data_as_objects(filepath) do
+    {:ok, file} = File.open("res/objects.json", [:write])
+    {status, result} = filepath
+      |> convert_file_data_into_objects()
+      |> JSON.encode()
+
+    case status do
+      :ok ->
+        filewrite_status = IO.binwrite(file, result)
+        if filewrite_status != :ok, do: raise RuntimeError, message: "Writing the JSON objects to the file failed."
+      _ -> raise RuntimeError, message: "Encoding the file objects as JSON failed."
+    end
   end
 
   def convert_file_data_into_objects(filepath) when is_bitstring(filepath) do
@@ -13,7 +29,7 @@ defmodule MarketData do
       [properties | data] = read_data_as_text_from_file(filepath)
       create_objects_as_maps(data, properties, [])
     rescue
-      e in MatchError -> raise RuntimeError, message: "The file is empty."
+      _e in MatchError -> raise RuntimeError, message: "The file is empty."
     end
   end
   def convert_file_data_into_objects(_), do:
@@ -28,7 +44,7 @@ defmodule MarketData do
 
       lines |> Enum.map(&split_line_into_tokens(&1))
     rescue
-      e in File.Error -> raise RuntimeError, message: "The file doesn't exist."
+      _e in File.Error -> raise RuntimeError, message: "The file doesn't exist."
     end
   end
 
@@ -54,10 +70,19 @@ defmodule MarketData do
     create_objects_as_maps(lists, properties, [object | objects])
   end
 
-  def retrieve_top_currencies_by_property(objects, property, number_of_currencies) do
-    objects
-    |> Enum.sort(fn x, y -> x[property] > y[property] end)
-    |> Enum.take(number_of_currencies)
-  end
+  @impl Mix.Task
+  def run(args) do
+    {incorrect_tokens, correct_tokens} = ArgParsing.process_arguments(args)
+    Enum.each(incorrect_tokens, &IO.puts("The argument \"#{&1}\" is incorrectly formated or does not exist."))
+    Enum.each(correct_tokens, fn x ->
+      if Enum.at(x, 0) != "path", do:
+        IO.puts("ERROR: The argument \"#{x}\" is incorrectly formated or is not specified in the documentation.")
+    end)
 
+    if incorrect_tokens == [] and length(correct_tokens) == 1 do
+      arg_name = correct_tokens |> Enum.at(0) |> Enum.at(0)
+      arg_value = correct_tokens |> Enum.at(0) |> Enum.at(1)
+      if arg_name == "path", do: create_json_file_containing_market_data_as_objects(arg_value)
+    end
+  end
 end

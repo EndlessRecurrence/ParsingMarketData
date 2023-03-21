@@ -24,3 +24,6 @@ market_data-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+
+# For ignoring the JSON file used to save the converted data objects
+res/objects.json
