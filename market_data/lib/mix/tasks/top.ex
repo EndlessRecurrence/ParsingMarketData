@@ -15,7 +15,9 @@ defmodule Mix.Tasks.Currencies.Top do
 
   def retrieve_top_currencies_by_property(property, number_of_currencies) do
     read_objects_from_json_file()
-    |> Enum.sort(fn x, y -> abs(x[property]) > abs(y[property]) end)
+    |> Enum.sort(fn x, y ->
+      if is_bitstring(x[property]), do: x[property] > y[property], else: abs(x[property]) > abs(y[property])
+    end)
     |> Enum.take(number_of_currencies)
   end
 
