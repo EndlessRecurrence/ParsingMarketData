@@ -23,10 +23,10 @@ defmodule Mix.Tasks.Currencies.Top do
   def run(args) do
     {incorrect_tokens, correct_tokens} = ArgParsing.process_arguments(args)
     allowed_arguments = ["count", "column"]
-    Enum.each(incorrect_tokens, &IO.puts("The argument \"#{&1}\" is incorrectly formated or is not specified in the documentation."))
+    Enum.each(incorrect_tokens, &IO.puts("ERROR: The argument \"#{&1}\" is incorrectly formated."))
     Enum.each(correct_tokens, fn x ->
       if not Enum.member?(allowed_arguments, Enum.at(x, 0)), do:
-        IO.puts("ERROR: The argument \"#{x}\" is incorrectly formated or is not specified in the documentation.")
+        IO.puts("ERROR: The argument \"#{x}\" is not specified in the documentation.")
     end)
 
     argument_validity = ArgParsing.are_arguments_allowed?(allowed_arguments, correct_tokens)
