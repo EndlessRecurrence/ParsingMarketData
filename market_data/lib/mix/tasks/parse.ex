@@ -5,11 +5,6 @@ defmodule Mix.Tasks.Currencies.Parse do
   use Mix.Task
   alias ArgParsing
 
-  #def main() do
-  #  convert_file_data_into_objects("res/data.txt") |>
-  #  retrieve_top_currencies_by_property("changePercent", 3)
-  #end
-
   def create_json_file_containing_market_data_as_objects(filepath) do
     {:ok, file} = File.open("res/objects.json", [:write])
     {status, result} = filepath
@@ -48,15 +43,6 @@ defmodule Mix.Tasks.Currencies.Parse do
     end
   end
 
-  def parse_string(string) when is_bitstring(string) do
-    if is_tuple(Integer.parse(string)) and elem(Integer.parse(string), 1) == "" do
-      elem(Integer.parse(string), 0)
-    else
-      if is_tuple(Float.parse(string)) and elem(Float.parse(string), 1) == "", do: elem(Float.parse(string), 0), else: string
-    end
-  end
-  def parse_string(_), do: raise ArgumentError, message: "The input to parse_string should be a BitString."
-
   def split_line_into_tokens(line) when is_bitstring(line) do
     Regex.split(~r/\s+/, line)
   end
@@ -65,7 +51,7 @@ defmodule Mix.Tasks.Currencies.Parse do
   def create_objects_as_maps([], _, objects), do: objects
   def create_objects_as_maps([list | lists], properties, objects) do
     object = Enum.zip(0..length(properties), list)
-      |> Enum.map(fn {index, value} -> {Enum.at(properties, index), parse_string(value)} end)
+      |> Enum.map(fn {index, value} -> {Enum.at(properties, index), ArgParsing.parse_string(value)} end)
       |> Enum.into(%{})
     create_objects_as_maps(lists, properties, [object | objects])
   end
@@ -73,6 +59,7 @@ defmodule Mix.Tasks.Currencies.Parse do
   @impl Mix.Task
   def run(args) do
     {incorrect_tokens, correct_tokens} = ArgParsing.process_arguments(args)
+    allowed_arguments = ["path"]
     Enum.each(incorrect_tokens, &IO.puts("The argument \"#{&1}\" is incorrectly formated or does not exist."))
     Enum.each(correct_tokens, fn x ->
       if Enum.at(x, 0) != "path", do:
@@ -80,9 +67,11 @@ defmodule Mix.Tasks.Currencies.Parse do
     end)
 
     if incorrect_tokens == [] and length(correct_tokens) == 1 do
-      arg_name = correct_tokens |> Enum.at(0) |> Enum.at(0)
       arg_value = correct_tokens |> Enum.at(0) |> Enum.at(1)
-      if arg_name == "path", do: create_json_file_containing_market_data_as_objects(arg_value)
+      if ArgParsing.are_arguments_allowed?(allowed_arguments, correct_tokens) do
+        create_json_file_containing_market_data_as_objects(arg_value)
+        File.read!("res/objects.json") |> JSON.decode() |> elem(1) |> IO.inspect
+      end
     end
   end
 end
