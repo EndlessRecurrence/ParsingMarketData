@@ -56,6 +56,21 @@ defmodule Mix.Tasks.Currencies.Parse do
     create_objects_as_maps(lists, properties, [object | objects])
   end
 
+  def handle_float_precision_of_object_properties(object, precision) do
+    object
+      |> Enum.map(fn {x, y} ->
+        cond do
+          is_float(y) -> {x, Float.round(y, precision)}
+          true -> {x, y}
+        end
+      end)
+      |> Enum.into(%{})
+  end
+
+  def handle_float_precision_for_objects(objects, precision) do
+    objects |> Enum.map(&handle_float_precision_of_object_properties(&1, precision))
+  end
+
   @impl Mix.Task
   def run(args) do
     {incorrect_tokens, correct_tokens} = ArgParsing.process_arguments(args)
@@ -70,7 +85,11 @@ defmodule Mix.Tasks.Currencies.Parse do
       arg_value = correct_tokens |> Enum.at(0) |> Enum.at(1)
       if ArgParsing.are_arguments_allowed?(allowed_arguments, correct_tokens) do
         create_json_file_containing_market_data_as_objects(arg_value)
-        File.read!("res/objects.json") |> JSON.decode() |> elem(1) |> IO.inspect
+        File.read!("res/objects.json")
+          |> JSON.decode()
+          |> elem(1)
+          |> handle_float_precision_for_objects(4)
+          |> IO.inspect
       end
     end
   end
