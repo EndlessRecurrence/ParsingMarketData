@@ -9,7 +9,7 @@ defmodule Mix.Tasks.Currencies.Top do
       :ok ->
         {decoding_status, objects} = JSON.decode(contents)
         if decoding_status == :ok, do: objects, else: raise RuntimeError, message: "JSON file could not be decoded."
-      _ -> raise RuntimeError, message: "JSON file containing the objects could not be read."
+      _ -> raise RuntimeError, message: "JSON file containing the objects could not be read, because it doesn't exist."
     end
   end
 
